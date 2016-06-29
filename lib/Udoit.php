@@ -79,7 +79,7 @@ class Udoit
         $this->base_uri      = $data['base_uri'];
         $this->content_types = $data['content_types'];
         $this->course_id     = $data['course_id'];
-        $this->total_results = ['errors' => 0, 'warnings' => 0, 'suggestions' => 0];
+        $this->total_results = ['errors' => 0, 'warnings' => 0, 'suggestions' => 0, 'unscannable' => 0];
         $this->module_urls = [];
         $this->unscannable   = [];
     }
@@ -119,6 +119,7 @@ class Udoit
 
             if ($courseContentType['unscannable']) {
                 $this->unscannable = $courseContentType['unscannable'];
+                $this->total_results['unscannable'] = count( $this->unscannable );
             }
 
             $courseContentType['items'] = $typeResults;
