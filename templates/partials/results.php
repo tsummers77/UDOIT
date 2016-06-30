@@ -20,7 +20,7 @@
 ?>
 <h1 class="text-center">
 	Report for <?= $this->e($course); ?><br>
-	<small><?= $this->e($error_count); ?> error<?= ( $this->e($error_count) > 1 )? 's': ?>, <?= $suggestion_count; ?> suggestion<?= ( $suggestion_count > 1 )? 's': ?>, <?= $unscannable_count; ?> unscannable<?= ( $unscannable_count > 1 )? 's': ?></small>
+	<small><?= $this->e($error_count); ?> error<?= ( $this->e($error_count) > 1 )? 's':?>, <?= $suggestion_count; ?> suggestion<?= ( $suggestion_count > 1 )? 's': ''; ?>, <?= $unscannable_count; ?> unscannable<?= ( $unscannable_count > 1 )? 's': ''; ?></small>
 </h1>
 
 <p>
