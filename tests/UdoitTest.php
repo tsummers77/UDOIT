@@ -10,7 +10,7 @@ class UdoitTest extends PHPUnit_Framework_TestCase
         $this->data = [
             'api_key'       => '',
             'base_uri'      => '',
-            'content_types' => ['announcements', 'assignments', 'discussions', 'files', 'pages', 'syllabus', 'modules'],
+            'content_types' => ['pages'],
             'course_id'     => '654321',
             'test'          => true
         ];
@@ -21,55 +21,32 @@ class UdoitTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('', $buffer);
     }
 
+    public function testBuildReport() {
+
+        //ob_start();
+        $temp           = new Udoit($this->data);
+
+        $temp->buildReport();
+
+        // error_log('Content Report: '.print_r($this, true));
+
+        $this->assertTrue(true);
+        //$this->checkOutputBuffer();
+    }
+
     public function testParseLinks() {
-        $error_html     = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="">';
-        $new_content    = 'test';
-        $expected       = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="test">';
+        $links          = '<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="current",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="first",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="last"';
+        $pretty       = [
+                "current"   => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
+                "first"     => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
+                "last"      => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100"
+            ];
 
         ob_start();
-        $temp           = new Ufixit($this->data);
-        $output         = $temp->fixAltText($error_html, $new_content);
+        $temp           = new Udoit($this->data);
+        $temp->parseLinks($links);
 
-        $this->assertEquals($expected, $output);
-        $this->checkOutputBuffer();
-    }
-
-    public function testBuildReport() {
-        $error_html     = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="">';
-        $new_content    = 'test';
-        $expected       = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="test">';
-
-        ob_start();
-        $temp           = new Ufixit($this->data);
-        $output         = $temp->fixAltText($error_html, $new_content);
-
-        $this->assertEquals($expected, $output);
-        $this->checkOutputBuffer();
-    }
-
-    public function testBuildReport() {
-        $error_html     = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="">';
-        $new_content    = 'test';
-        $expected       = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="test">';
-
-        ob_start();
-        $temp           = new Ufixit($this->data);
-        $output         = $temp->fixAltText($error_html, $new_content);
-
-        $this->assertEquals($expected, $output);
-        $this->checkOutputBuffer();
-    }
-
-    public function testBuildReport() {
-        $error_html     = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="">';
-        $new_content    = 'test';
-        $expected       = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="test">';
-
-        ob_start();
-        $temp           = new Ufixit($this->data);
-        $output         = $temp->fixAltText($error_html, $new_content);
-
-        $this->assertEquals($expected, $output);
+        $this->assertTrue(is_array($output) && array_diff($pretty, $output) === array_diff($output, $pretty));
         $this->checkOutputBuffer();
     }
 

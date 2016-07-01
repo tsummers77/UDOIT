@@ -163,6 +163,8 @@ class Udoit
             $_SESSION["progress"] = 'done';
             session_write_close();
         }
+
+        // error_log('UDOIT_OBJECT: '.print_r($this, true));
     }
 
     /**
@@ -242,204 +244,206 @@ class Udoit
         $per_page    = 100;
         $page_count = 1;
 
-        switch ($type) {
-            case 'announcements':
-                $page_count = 1;
-                do {
-                    $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/discussion_topics?&only_announcements=true&access_token='.$this->api_key.'&page='.$page_count;
-                    $response = Request::get($url)->send();
-
-                    foreach ($response->body as $thing) {
-                        $the_content[] = $thing;
-                    }
-                    $page_count++;
-
-                } while (!(empty($response->body)));
-
-
-                break;
-            case 'assignments':
-                $page_count = 1;
-                do {
-                    $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/assignments?&access_token='.$this->api_key.'&page='.$page_count;
-                    $response = Request::get($url)->send();
-
-                    foreach ($response->body as $thing) {
-                        $the_content[] = $thing;
-                    }
-                    $page_count++;
-
-                } while (!(empty($response->body)));
-
-                break;
-            case 'discussions':
-                $page_count = 1;
-                do {
-                    $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/discussion_topics?&access_token='.$this->api_key.'&page='.$page_count;
-                    $response = Request::get($url)->send();
-
-                    foreach ($response->body as $thing) {
-                        $the_content[] = $thing;
-                    }
-                    $page_count++;
-                } while (!(empty($response->body)));
-
-                break;
-            case 'files':
-                $url = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/files?page=1&per_page='.$per_page.'&access_token='.$this->api_key;
-
-                do {
-                    $response  = Request::get($url)->send();
-                    $the_links = $this->parseLinks($response->headers->toArray()['link']);
-
-
-                    foreach ($response->body as $thing) {
-                        $the_content[] = $thing;
-                    }
-
-                    if (isset($the_links['next'])) {
-                        $url = $the_links['next'].'&access_token='.$this->api_key;
-                    }
-
-                } while (isset($the_links['next']));
-
-                break;
-            case 'pages':
-                $url = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/pages?page=1&per_page='.$per_page.'&access_token='.$this->api_key;
-                do {
-                    $response  = Request::get($url)->send();
-                    $the_links = $this->parseLinks($response->headers->toArray()['link']);
-
-                    foreach ($response->body as $thing) {
-                        $the_content[] = $thing;
-                    }
-
-                    if (isset($the_links['next'])) {
-                        $url = $the_links['next'].'&access_token='.$this->api_key;
-                    }
-                } while (isset($the_links['next']));
-                break;
-            case 'syllabus':
-                $url           = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/?include[]=syllabus_body&access_token='.$this->api_key;
-                $response      = Request::get($url)->send();
-                $the_content[] = $response->body;
-
-                break;
-            case 'modules':
-                $page_count = 1;
-                do {
-                    $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/modules?include[]=items&access_token='.$this->api_key.'&page='.$page_count;
-                    $response = Request::get($url)->send()->body;
-
-                    foreach ($response as $r) {
-                        foreach ($r->items as $item) {
-                            $the_content[] = $item;
-                        }
-                    }
-                    $page_count++;
-                } while (!(empty($response->body)));
-
-                break;
-        }
-
-        foreach ($the_content as $single) {
+        if ( !$this->test ) {
             switch ($type) {
                 case 'announcements':
-                    array_push($content_result['items'], [
-                        'id'      => $single->id,
-                        'content' => $single->message,
-                        'title'   => $single->title,
-                        'url'     => $single->html_url
-                        ]
-                    );
+                    $page_count = 1;
+                    do {
+                        $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/discussion_topics?&only_announcements=true&access_token='.$this->api_key.'&page='.$page_count;
+                        $response = Request::get($url)->send();
+
+                        foreach ($response->body as $thing) {
+                            $the_content[] = $thing;
+                        }
+                        $page_count++;
+
+                    } while (!(empty($response->body)));
+
+
                     break;
                 case 'assignments':
-                    array_push($content_result['items'], [
-                        'id'      => $single->id,
-                        'content' => $single->description,
-                        'title'   => $single->name,
-                        'url'     => $single->html_url
-                        ]
-                    );
+                    $page_count = 1;
+                    do {
+                        $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/assignments?&access_token='.$this->api_key.'&page='.$page_count;
+                        $response = Request::get($url)->send();
+
+                        foreach ($response->body as $thing) {
+                            $the_content[] = $thing;
+                        }
+                        $page_count++;
+
+                    } while (!(empty($response->body)));
+
                     break;
                 case 'discussions':
-                    array_push($content_result['items'], [
-                        'id'      => $single->id,
-                        'content' => $single->message,
-                        'title'   => $single->title,
-                        'url'     => $single->html_url
-                        ]
-                    );
+                    $page_count = 1;
+                    do {
+                        $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/discussion_topics?&access_token='.$this->api_key.'&page='.$page_count;
+                        $response = Request::get($url)->send();
+
+                        foreach ($response->body as $thing) {
+                            $the_content[] = $thing;
+                        }
+                        $page_count++;
+                    } while (!(empty($response->body)));
+
                     break;
                 case 'files':
-                    $extension = pathinfo($single->filename, PATHINFO_EXTENSION);
-                    // ignore ._ mac files
-                    $mac_check = substr($single->display_name, 0, 2);
-                    if ($mac_check !== '._') {
-                        // filters non html files
-                        if ($extension !== 'html' && $extension !== 'htm') {
-                            if ($extension === 'pdf' || $extension === 'doc' || $extension === 'docx' || $extension === 'ppt' || $extension === 'pptx') {
-                                array_push($content_result['unscannable'], [
-                                    'title' => $single->display_name,
-                                    'url'   => $single->url
+                    $url = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/files?page=1&per_page='.$per_page.'&access_token='.$this->api_key;
+
+                    do {
+                        $response  = Request::get($url)->send();
+                        $the_links = $this->parseLinks($response->headers->toArray()['link']);
+
+
+                        foreach ($response->body as $thing) {
+                            $the_content[] = $thing;
+                        }
+
+                        if (isset($the_links['next'])) {
+                            $url = $the_links['next'].'&access_token='.$this->api_key;
+                        }
+
+                    } while (isset($the_links['next']));
+
+                    break;
+                case 'pages':
+                    $url = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/pages?page=1&per_page='.$per_page.'&access_token='.$this->api_key;
+                    do {
+                        $response  = Request::get($url)->send();
+                        $the_links = $this->parseLinks($response->headers->toArray()['link']);
+
+                        foreach ($response->body as $thing) {
+                            $the_content[] = $thing;
+                        }
+
+                        if (isset($the_links['next'])) {
+                            $url = $the_links['next'].'&access_token='.$this->api_key;
+                        }
+                    } while (isset($the_links['next']));
+                    break;
+                case 'syllabus':
+                    $url           = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/?include[]=syllabus_body&access_token='.$this->api_key;
+                    $response      = Request::get($url)->send();
+                    $the_content[] = $response->body;
+
+                    break;
+                case 'modules':
+                    $page_count = 1;
+                    do {
+                        $url      = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/modules?include[]=items&access_token='.$this->api_key.'&page='.$page_count;
+                        $response = Request::get($url)->send()->body;
+
+                        foreach ($response as $r) {
+                            foreach ($r->items as $item) {
+                                $the_content[] = $item;
+                            }
+                        }
+                        $page_count++;
+                    } while (!(empty($response->body)));
+
+                    break;
+            }
+
+            foreach ($the_content as $single) {
+                switch ($type) {
+                    case 'announcements':
+                        array_push($content_result['items'], [
+                            'id'      => $single->id,
+                            'content' => $single->message,
+                            'title'   => $single->title,
+                            'url'     => $single->html_url
+                            ]
+                        );
+                        break;
+                    case 'assignments':
+                        array_push($content_result['items'], [
+                            'id'      => $single->id,
+                            'content' => $single->description,
+                            'title'   => $single->name,
+                            'url'     => $single->html_url
+                            ]
+                        );
+                        break;
+                    case 'discussions':
+                        array_push($content_result['items'], [
+                            'id'      => $single->id,
+                            'content' => $single->message,
+                            'title'   => $single->title,
+                            'url'     => $single->html_url
+                            ]
+                        );
+                        break;
+                    case 'files':
+                        $extension = pathinfo($single->filename, PATHINFO_EXTENSION);
+                        // ignore ._ mac files
+                        $mac_check = substr($single->display_name, 0, 2);
+                        if ($mac_check !== '._') {
+                            // filters non html files
+                            if ($extension !== 'html' && $extension !== 'htm') {
+                                if ($extension === 'pdf' || $extension === 'doc' || $extension === 'docx' || $extension === 'ppt' || $extension === 'pptx') {
+                                    array_push($content_result['unscannable'], [
+                                        'title' => $single->display_name,
+                                        'url'   => $single->url
+                                        ]
+                                    );
+                                }
+                            } else {
+                                array_push($content_result['items'], [
+                                    'id'      => $single->id,
+                                    'content' => Request::get($single->url)->followRedirects()->expectsHtml()->send()->body,
+                                    'title'   => $single->display_name,
+                                    'url'     => $single->url
                                     ]
                                 );
                             }
-                        } else {
-                            array_push($content_result['items'], [
-                                'id'      => $single->id,
-                                'content' => Request::get($single->url)->followRedirects()->expectsHtml()->send()->body,
-                                'title'   => $single->display_name,
-                                'url'     => $single->url
+                        }
+                        break;
+                    case 'pages':
+                        $url       = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/pages/'.$single->url.'?access_token='.$this->api_key;
+                        $wiki_page = Request::get($url)->send();
+
+                        array_push($content_result['items'], [
+                            'id'      => $wiki_page->body->url,
+                            'content' => $wiki_page->body->body,
+                            'title'   => $wiki_page->body->title,
+                            'url'     => $wiki_page->body->html_url
+                            ]
+                        );
+                        break;
+                    case 'syllabus':
+                        array_push($content_result['items'], [
+                            'id'      => $single->id,
+                            'content' => $single->syllabus_body,
+                            'title'   => 'Syllabus',
+                            'url'     => $this->base_uri.'/courses/'.$single->id.'/assignments/syllabus'
+                            ]
+                        );
+                        break;
+                    case 'modules':
+                        $search = '/(youtube|vimeo)/';
+                        $external_url = isset($single->external_url) ? $single->external_url : '';
+
+                        if (preg_match($search, $external_url)) {
+                            array_push($content_result['module_urls'], [
+                                'id'           => $single->id,
+                                'external_url' => $single->external_url,
+                                'title'        => $single->title,
+                                'url'          => $single->html_url
                                 ]
                             );
                         }
-                    }
-                    break;
-                case 'pages':
-                    $url       = $this->base_uri.'/api/v1/courses/'.$this->course_id.'/pages/'.$single->url.'?access_token='.$this->api_key;
-                    $wiki_page = Request::get($url)->send();
-
-                    array_push($content_result['items'], [
-                        'id'      => $wiki_page->body->url,
-                        'content' => $wiki_page->body->body,
-                        'title'   => $wiki_page->body->title,
-                        'url'     => $wiki_page->body->html_url
-                        ]
-                    );
-                    break;
-                case 'syllabus':
-                    array_push($content_result['items'], [
-                        'id'      => $single->id,
-                        'content' => $single->syllabus_body,
-                        'title'   => 'Syllabus',
-                        'url'     => $this->base_uri.'/courses/'.$single->id.'/assignments/syllabus'
-                        ]
-                    );
-                    break;
-                case 'modules':
-                    $search = '/(youtube|vimeo)/';
-                    $external_url = isset($single->external_url) ? $single->external_url : '';
-
-                    if (preg_match($search, $external_url)) {
-                        array_push($content_result['module_urls'], [
-                            'id'           => $single->id,
-                            'external_url' => $single->external_url,
-                            'title'        => $single->title,
-                            'url'          => $single->html_url
-                            ]
-                        );
-                    }
-                    break;
+                        break;
+                }
             }
+        } else {
+            $content_result = $test_content;
         }
 
         $time_end                 = microtime(true);
         $content_result['amount'] = count($content_result['items']);
         $content_result['items']  = $this->generateReport($content_result['items']);
         $content_result['time']   = round($time_end - $content_result['time'], 2);
-
-        error_log( print_r($content_results, true) );
 
         return $content_result;
     }
@@ -451,6 +455,7 @@ class Udoit
      */
     public static function parseLinks($links)
     {
+        //error_log( 'Links: '.print_r($links, true));
         $links  = explode(',', $links);
         $pretty = [];
 

@@ -1,20 +1,111 @@
 <?php
 
-$test_content_result = [
+$test_content = [
     "items"         => [
         [
-            "id"        => "test",
-            "content"   => '<p>Insufficient text color contrast with the background:&nbsp;<span style="color: #ffff99;">Bad contrasting text</span></p>
-<p>Multimedia objects should have text equivalents(e.g., transcripts): <object title="" width="300" height="150"></object></p>
-<p><span style="text-decoration: underline;"><strong>Suggestions</strong></span></p>
-<p>Avoid the use of animated GIFs: <img src="http://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/21944/versions/2/screenshot.gif" alt="" /></p>
-<p>Synchronized captions should be provided for prerecorded web-based video:</p>
-<p><a class="" href="https://www.youtube.com/watch?v=JbLEPXhLVaA">https://www.youtube.com/watch?v=JbLEPXhLVaA</a></p>
-<p>Link text should be descriptive: <a href="http://example.com/document.pdf">click here!</a></p>
-<p>Headings should contain text:</p>
-<h1></h1>
-<p>Change paragraphs to headings:</p>',
-            "title"     => "TEST",
+            "id"        => "headershavetext",
+            "content"   => '<h1></h1>',
+            "title"     => "headersHaveText",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "amustcontaintext",
+            "content"   => '<p><a href="https://www.google.com/&amp;c=1" target="_blank"></a></p>',
+            "title"     => "aMustContainText",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "asuspiciouslinktext",
+            "content"   => '<p><a href="http://example.com/document.pdf">Click Here</a></p>',
+            "title"     => "aSuspiciousLinkText",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "alinktextdoesnotbeginwithredundantword",
+            "content"   => '<p><a href="https://www.google.com/">link to site</a></p>',
+            "title"     => "aLinkTextDoesNotBeginWithRedundantWord",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "csstexthascontrast",
+            "content"   => '<p style="color: #ffff00;">Colored “Text”</p>',
+            "title"     => "cssTextHasContrast",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "csstextstyleemphasize",
+            "content"   => '<p style="color: #00000f;">Colored “Text”</p>',
+            "title"     => "cssTextStyleEmphasize",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "imghasalt",
+            "content"   => '<img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="">',
+            "title"     => "imgHasAlt",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "imgaltisdifferent",
+            "content"   => '<img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="googlelogo_color_272x92dp.png"></p>',
+            "title"     => "imgAltIsDifferent",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "tabledatashouldhaveth",
+            "content"   => '<table border="1">
+                                <tbody>
+                                    <tr>
+                                        <td>Header 1</td>
+                                        <td>Header 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Placeholder 1</td>
+                                        <td>Placeholder 2</td>
+                                    </tr>
+                                </tbody>
+                            </table>',
+            "title"     => "tableDataShouldHaveTh",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "tablethshouldhavescope",
+            "content"   => '<table border="1">
+                                <tbody>
+                                    <tr>
+                                        <th>Header 1</th>
+                                        <th scope="col">Header 2</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Placeholder 1</td>
+                                        <td>Placeholder 2</td>
+                                    </tr>
+                                </tbody>
+                            </table>',
+            "title"     => "tableThShouldHaveScope",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "pnotusedasheader",
+            "content"   => '<p><strong>Bolded Paragraph Text</strong></p>',
+            "title"     => "pNotUsedAsHeader",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "videosembeddedorlinkedneedcaptions",
+            "content"   => '<p><a href="https://www.youtube.com/watch?v=5IJWckL5L84">Video Without Captions</a></p>',
+            "title"     => "videosEmbeddedOrLinkedNeedCaptions",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "noheadings",
+            "content"   => '<p>Placeholder Text 1</p><p>Placeholder Text 2</p><p>Placeholder Text 3</p><p>Placeholder Text 4</p><p>Placeholder Text 5</p>',
+            "title"     => "noHeadings",
+            "url"       => "https://"
+        ],
+        [
+            "id"        => "imggifnoflicker",
+            "content"   => '<img src="http://koala3123inv.com/sites/all/libraries/quail/test/assets/eatatjoes.gif" alt="Flickering Image">',
+            "title"     => "imgGifNoFlicker",
             "url"       => "https://"
         ]
     ],
@@ -23,119 +114,3 @@ $test_content_result = [
     "module_urls"   => [],
     "unscannable"   => []
 ];
-
-
-// UDOIT OBJECT {
-//     ["course"]=> string(25) "Dev_UDOIT_DEV_Joseph_F_08"
-//     ["total_results"]=> {
-//         ["errors"]=> int(5)
-//         ["warnings"]=> int(0)
-//         ["suggestions"]=> int(3)
-//     }
-//     ["content"]=> {
-//         ["pages"]=> object(stdClass) {
-//             ["title"]=> string(5) "pages"
-//             ["items"]=> array(1) {
-//                 [0]=> object(stdClass) {
-//                     ["id"]=> string(4) "test"
-//                     ["name"]=> string(4) "TEST"
-//                     ["url"]=> string(53) "https://webcourses.ucf.edu/courses/1165242/pages/test"
-//                     ["amount"]=> int(8)
-//                     ["error"]=> array(5) {
-//                         [0]=> object(stdClass) {
-//                             ["type"]=> string(9) "imgHasAlt"
-//                             ["lineNo"]=> int(4)
-//                             ["severity"]=> string(5) "Error"
-//                             ["severity_num"]=> int(1)
-//                             ["title"]=> string(45) "Image elements should have an "alt" attribute"
-//                             ["description"]=> string(304) "Alternative Text (Alt Text) is an alternative (non-visual) way to describe the meaning of an image. Please provide a brief (under 100 characters) description of the image for a screen reader user. Note: It should not be the image file name."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(126) " "
-//                         }
-//                         [1]=> object(stdClass) {
-//                             ["type"]=> string(21) "objectMustContainText"
-//                             ["lineNo"]=> int(2)
-//                             ["severity"]=> string(5) "Error"
-//                             ["severity_num"]=> int(1)
-//                             ["title"]=> string(68) "Multimedia objects should have text equivalents (e.g., transcripts)."
-//                             ["description"]=> string(89) "Multimedia objects should be accompanied by a link to a transcript of the content."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(273) " "
-//                         }
-//                         [2]=> object(stdClass) {
-//                             ["colors"]=> array(1) {
-//                                 [0]=> string(7) "#ffff99"
-//                             }
-//                             ["type"]=> string(18) "cssTextHasContrast"
-//                             ["lineNo"]=> int(1)
-//                             ["severity"]=> string(5) "Error"
-//                             ["severity_num"]=> int(1)
-//                             ["title"]=> string(52) "Insufficient text color contrast with the background"
-//                             ["description"]=> string(154) "Text color should be easily viewable and should not be the only indicator of meaning or function. Color balance should have at least a 4.5:1 ratio."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(58) "Bad contrasting text "
-//                         }
-//                         [3]=> object(stdClass) {
-//                             ["type"]=> string(15) "headersHaveText"
-//                             ["lineNo"]=> int(9)
-//                             ["severity"]=> string(5) "Error"
-//                             ["severity_num"]=> int(1)
-//                             ["title"]=> string(28) "Headings should contain text"
-//                             ["description"]=> string(236) "Sighted and screen reader users depend on headings to organize the content on the page. Headings should not be empty and should represent an accurate outline of the content"
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(10) ""
-//                         }
-//                         [4]=> object(stdClass) {
-//                             ["type"]=> string(34) "videosEmbeddedOrLinkedNeedCaptions"
-//                             ["lineNo"]=> int(6)
-//                             ["severity"]=> string(5) "Error"
-//                             ["severity_num"]=> int(1)
-//                             ["title"]=> string(125) "Synchronized captions should be provided for prerecorded web-based video"
-//                             ["description"]=> string(102) "Captions should be included in the video to provide dialogue to users who are hearing impaired."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(111) "https://www.youtube.com/watch?v=JbLEPXhLVaA "
-//                         }
-//                     }
-//                     ["warning"]=> array(0) { }
-//                     ["suggestion"]=> array(3) {
-//                         [0]=> object(stdClass) {
-//                             ["type"]=> string(31) "objectShouldHaveLongDescription"
-//                             ["lineNo"]=> int(2)
-//                             ["severity"]=> string(10) "Suggestion"
-//                             ["severity_num"]=> int(3)
-//                             ["title"]=> string(42) "An object might require a long description"
-//                             ["description"]=> string(92) "Objects might require a long description, especially if their content is complicated."
-//                             ["path"]=> string(4) "None"0
-//                             ["html"]=> string(273) " "
-//                         }
-//                         [1]=> object(stdClass) {
-//                             ["type"]=> string(27) "objectInterfaceIsAccessible"
-//                             ["lineNo"]=> int(2)
-//                             ["severity"]=> string(10) "Suggestion"
-//                             ["severity_num"]=> int(3)
-//                             ["title"]=> string(46) "Interfaces within objects should be accessible"
-//                             ["description"]=> string(142) "Object content should be assessed for accessibility. Objects cannot be checked using automated tools, this should be reviewed manually."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(273) " "
-//                         }
-//                         [2]=> object(stdClass) {
-//                             ["type"]=> string(19) "aSuspiciousLinkText"
-//                             ["lineNo"]=> int(6)
-//                             ["severity"]=> string(10) "Suggestion"
-//                             ["severity_num"]=> int(3)
-//                             ["title"]=> string(31) "Link text should be descriptive"
-//                             ["description"]=> string(140) "Links should be descriptive of the content they're linking to, such as 'Class Schedule' rather than 'schedule.html' or 'click here'."
-//                             ["path"]=> string(4) "None"
-//                             ["html"]=> string(111) "https://www.youtube.com/watch?v=JbLEPXhLVaA "
-//                         }
-//                     }
-//                 }
-//             }
-//             ["amount"]=> int(1)
-//             ["time"]=> float(0.61)
-//         }
-//     }
-// }
-
-
-?>

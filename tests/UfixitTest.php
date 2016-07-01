@@ -20,9 +20,9 @@ class UfixitTest extends PHPUnit_Framework_TestCase
     }
 
     public function testFixAltText() {
-        $error_html     = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="">';
+        $error_html     = '<img src="https://resources.instructure.com/courses/1234567/image.jpg" alt="">';
         $new_content    = 'test';
-        $expected       = '<img src="https://webcourses.ucf.edu/courses/1234567/image.jpg" alt="test">';
+        $expected       = '<img src="https://resources.instructure.com/courses/1234567/image.jpg" alt="test">';
 
         ob_start();
         $temp           = new Ufixit($this->data);
@@ -80,10 +80,26 @@ class UfixitTest extends PHPUnit_Framework_TestCase
         $this->checkOutputBuffer();
     }
 
+    public function testFixCssColor_TwoColorsBoldItalicSpeacialChar() {
+        $error_html     = '<span style="color: #ffff00; background: #ffffff;">Bad Contrasting “Text”</span>';
+        $error_colors   = ['ffff00', 'ffffff'];
+        $new_content    = ['000000', 'fffff0'];
+        $expected       = '<span style="color: #000000; background: #fffff0; font-weight: bold; font-style: italic;">Bad Contrasting “Text”</span>';
+        $bold           = true;
+        $italic         = true;
+
+        ob_start();
+        $temp           = new Ufixit($this->data);
+        $output         = $temp->fixCssColor($error_colors, $error_html, $new_content, $bold, $italic);
+
+        $this->assertEquals($expected, $output);
+        $this->checkOutputBuffer();
+    }
+
     public function testFixLink_NewText() {
-        $error_html     = '<a href="https://webcourses.ucf.edu/courses/1234567/image.jpg"></a>';
+        $error_html     = '<a href="https://resources.instructure.com/courses/1234567/image.jpg"></a>';
         $new_content    = 'test';
-        $expected       = '<a href="https://webcourses.ucf.edu/courses/1234567/image.jpg">test</a>';
+        $expected       = '<a href="https://resources.instructure.com/courses/1234567/image.jpg">test</a>';
 
         ob_start();
         $temp           = new Ufixit($this->data);
@@ -94,7 +110,7 @@ class UfixitTest extends PHPUnit_Framework_TestCase
     }
 
     public function testFixLink_DeleteLink() {
-        $error_html     = '<a href="https://webcourses.ucf.edu/courses/1234567/image.jpg"></a>';
+        $error_html     = '<a href="https://resources.instructure.com/courses/1234567/image.jpg"></a>';
         $new_content    = '';
         $expected       = '';
 
