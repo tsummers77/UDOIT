@@ -9,7 +9,8 @@ class UfixitTest extends PHPUnit_Framework_TestCase
             'api_key'       => '',
             'base_uri'      => '',
             'content_id'    => '',
-            'course_id'     => ''
+            'course_id'     => '',
+            'test'          => true
         ];
     }
 

@@ -17,8 +17,8 @@
 *
 *   Primary Author Contact:  Jacob Bates <jacob.bates@ucf.edu>
 */
-require_once('../vendor/autoload.php');
-require_once('quail/quail/quail.php');
+require_once(__DIR__.'../vendor/autoload.php');
+require_once(__DIR__.'quail/quail/quail.php');
 
 use Httpful\Request;
 
@@ -70,6 +70,11 @@ class Udoit
     public $unscannable;
 
     /**
+     * @var bool - Test environment marker. True if in test environment
+     */
+    private $test;
+
+    /**
      * The class constructor
      * @param array data - An array of POST data
      */
@@ -79,8 +84,9 @@ class Udoit
         $this->base_uri      = $data['base_uri'];
         $this->content_types = $data['content_types'];
         $this->course_id     = $data['course_id'];
+        $this->test          = ( defined($data['test']) )? $data['test']: false;
         $this->total_results = ['errors' => 0, 'warnings' => 0, 'suggestions' => 0];
-        $this->module_urls = [];
+        $this->module_urls   = [];
         $this->unscannable   = [];
     }
 
@@ -90,14 +96,18 @@ class Udoit
      */
     public function buildReport()
     {
-        session_start();
-        $_SESSION['progress'] = 0;
-        session_write_close();
+        if ( !$this->test ) {
+            session_start();
+            $_SESSION['progress'] = 0;
+            session_write_close();
+        }
 
         foreach ($this->content_types as $type) {
-            session_start();
-            $_SESSION["progress"] = $type;
-            session_write_close();
+            if ( !$this->test ) {
+                session_start();
+                $_SESSION["progress"] = $type;
+                session_write_close();
+            }
 
             $typeResults = [];
 
@@ -148,9 +158,11 @@ class Udoit
         }
 
         // so the ajax call knows we're done
-        session_start();
-        $_SESSION["progress"] = 'done';
-        session_write_close();
+        if ( !$this->test ) {
+            session_start();
+            $_SESSION["progress"] = 'done';
+            session_write_close();
+        }
     }
 
     /**
@@ -243,7 +255,7 @@ class Udoit
                     $page_count++;
 
                 } while (!(empty($response->body)));
-                
+
 
                 break;
             case 'assignments':
@@ -426,6 +438,8 @@ class Udoit
         $content_result['amount'] = count($content_result['items']);
         $content_result['items']  = $this->generateReport($content_result['items']);
         $content_result['time']   = round($time_end - $content_result['time'], 2);
+
+        error_log( print_r($content_results, true) );
 
         return $content_result;
     }
