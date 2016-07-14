@@ -23,15 +23,15 @@ class UdoitTest extends PHPUnit_Framework_TestCase
 
     public function testBuildReport() {
 
-        //ob_start();
+        ob_start();
         $temp           = new Udoit($this->data);
 
         $temp->buildReport();
+        $results = $temp->bad_content['pages']->items;
 
-        // error_log('Content Report: '.print_r($this, true));
+        $this->assertCount(14, count($results));
 
-        $this->assertTrue(true);
-        //$this->checkOutputBuffer();
+        $this->checkOutputBuffer();
     }
 
     public function testParseLinks() {

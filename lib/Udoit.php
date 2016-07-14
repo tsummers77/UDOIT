@@ -84,7 +84,7 @@ class Udoit
         $this->base_uri      = $data['base_uri'];
         $this->content_types = $data['content_types'];
         $this->course_id     = $data['course_id'];
-        $this->test          = ( defined($data['test']) )? $data['test']: false;
+        $this->test          = ( isset($data['test']) )? $data['test']: false;
         $this->total_results = ['errors' => 0, 'warnings' => 0, 'suggestions' => 0];
         $this->module_urls   = [];
         $this->unscannable   = [];
@@ -176,7 +176,7 @@ class Udoit
     {
         $content_report = [];
         /* Runs each item in the test array through the Quail accessibility checker */
-        foreach ($scanned_content as $html) {
+        foreach ((array)$scanned_content as $html) {
             if (strlen($html['content']) == 0) {
                 continue;
             }
@@ -233,18 +233,20 @@ class Udoit
      */
     private function getCourseContent($type)
     {
-        $content_result = [
-            'items'         => [],
-            'amount'        => 0,
-            'time'          => microtime(true),
-            'module_urls' => [],
-            'unscannable'   => [],
-        ];
-        $the_content = [];
-        $per_page    = 100;
-        $page_count = 1;
+        $content_result = null;
 
         if ( !$this->test ) {
+            $content_result = [
+                'items'         => [],
+                'amount'        => 0,
+                'time'          => microtime(true),
+                'module_urls' => [],
+                'unscannable'   => [],
+            ];
+            $the_content = [];
+            $per_page    = 100;
+            $page_count = 1;
+
             switch ($type) {
                 case 'announcements':
                     $page_count = 1;
