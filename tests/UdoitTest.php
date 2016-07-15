@@ -17,17 +17,22 @@ class UdoitTest extends PHPUnit_Framework_TestCase
     }
 
     public function checkOutputBuffer() {
-        $buffer         = ob_get_clean();
+        $buffer     = ob_get_clean();
         $this->assertEquals('', $buffer);
     }
 
     public function testBuildReport() {
 
+        $test       = '';
+
         ob_start();
-        $temp           = new Udoit($this->data);
+        $temp       = new Udoit($this->data);
 
         $temp->buildReport();
-        $results = $temp->bad_content['pages']->items;
+
+        $results    = $temp->bad_content['pages']['items'];
+
+        //$this->assertEquals($test, print_r($results, true));
 
         $this->assertCount(14, count($results));
 
@@ -35,15 +40,15 @@ class UdoitTest extends PHPUnit_Framework_TestCase
     }
 
     public function testParseLinks() {
-        $links          = '<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="current",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="first",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="last"';
-        $pretty       = [
+        $parse      = '<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="current",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="first",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="last"';
+        $pretty     = [
                 "current"   => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
                 "first"     => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
                 "last"      => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100"
             ];
 
         ob_start();
-        $temp           = new Udoit($this->data);
+        $temp       = new Udoit($this->data);
         $temp->parseLinks($links);
 
         $this->assertTrue(is_array($output) && array_diff($pretty, $output) === array_diff($output, $pretty));

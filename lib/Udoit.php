@@ -176,7 +176,7 @@ class Udoit
     {
         $content_report = [];
         /* Runs each item in the test array through the Quail accessibility checker */
-        foreach ((array)$scanned_content as $html) {
+        foreach ($scanned_content as $html) {
             if (strlen($html['content']) == 0) {
                 continue;
             }
@@ -441,6 +441,8 @@ class Udoit
         } else {
             $content_result = $test_content;
         }
+
+        $error_log('See here: '.print_r($content_result, true));
 
         $time_end                 = microtime(true);
         $content_result['amount'] = count($content_result['items']);
