@@ -439,10 +439,11 @@ class Udoit
                 }
             }
         } else {
+            include_once(__DIR__.'/tests/resources.php');
             $content_result = $test_content;
         }
 
-        error_log('See here: '.print_r($content_result, true));
+        die( error_log('See here: '.print_r($test_content, true)) );
 
         $time_end                 = microtime(true);
         $content_result['amount'] = count($content_result['items']);

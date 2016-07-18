@@ -110,6 +110,6 @@ $test_content['items'] = [
 ];
 
 $test_content['amount']        = 0;
-$test_content['time']          = 0;
+$test_content['time']          = (float)0;
 $test_content['module_urls']   = [];
 $test_content['unscannable']   = [];

@@ -28,11 +28,11 @@ class UdoitTest extends PHPUnit_Framework_TestCase
         ob_start();
         $temp       = new Udoit($this->data);
 
-        $temp->buildReport();
+        $out = $temp->buildReport();
 
         $results    = $temp->bad_content['pages']['items'];
 
-        //$this->assertEquals($test, print_r($results, true));
+        $this->assertEquals($test, $out);
 
         $this->assertCount(14, count($results));
 
