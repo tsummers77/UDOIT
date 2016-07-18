@@ -1,6 +1,6 @@
 <?php
 
-require_once('resources.php');
+require_once(__DIR__.'/../config/settings.php');
 
 class UdoitTest extends PHPUnit_Framework_TestCase
 {
@@ -22,25 +22,20 @@ class UdoitTest extends PHPUnit_Framework_TestCase
     }
 
     public function testBuildReport() {
-
-        $test       = '';
-
         ob_start();
         $temp       = new Udoit($this->data);
-
-        $out = $temp->buildReport();
+        $temp->buildReport();
 
         $results    = $temp->bad_content['pages']['items'];
 
-        $this->assertEquals($test, $out);
-
-        $this->assertCount(14, count($results));
+        $this->assertTrue(is_array($results));
+        $this->assertTrue(count($results) === 10);
 
         $this->checkOutputBuffer();
     }
 
     public function testParseLinks() {
-        $parse      = '<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="current",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="first",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="last"';
+        $links      = '<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="current",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="first",<https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100>; rel="last"';
         $pretty     = [
                 "current"   => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
                 "first"     => "https://resources.instructure.com/api/v1/courses/1200137/files?page=1&per_page=100",
@@ -49,7 +44,7 @@ class UdoitTest extends PHPUnit_Framework_TestCase
 
         ob_start();
         $temp       = new Udoit($this->data);
-        $temp->parseLinks($links);
+        $output     = $temp->parseLinks($links);
 
         $this->assertTrue(is_array($output) && array_diff($pretty, $output) === array_diff($output, $pretty));
         $this->checkOutputBuffer();
