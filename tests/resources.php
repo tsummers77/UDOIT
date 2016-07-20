@@ -106,6 +106,12 @@ $test_content['items'] = [
         'content'   => '<img src="http://koala3123inv.com/sites/all/libraries/quail/test/assets/eatatjoes.gif" alt="Flickering Image">',
         'title'     => "imgGifNoFlicker",
         'url'       => "https://"
+    ],
+    [
+        'id'        => "noIssues",
+        'content'   => '<p><a id="" class="" title="" href="https://www.youtube.com/watch?v=oJ9VbNtPhIk" target="">Video With Captions</a></p>',
+        'title'     => "noIssues",
+        'url'       => "https://"
     ]
 ];
 

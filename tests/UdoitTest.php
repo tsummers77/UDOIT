@@ -33,7 +33,7 @@ class UdoitTest extends PHPUnit_Framework_TestCase
 
         $this->checkOutputBuffer();
 
-        // $this->assertEquals($test, print_r($results, true));
+        $this->assertEquals($test, print_r($results, true));
 
         $this->assertTrue(is_array($results));
         $this->assertTrue(count($results) === 10);
