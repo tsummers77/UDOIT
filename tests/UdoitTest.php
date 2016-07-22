@@ -39,8 +39,92 @@ class UdoitTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(count($results) === 10);
 
         foreach( $results as $page ) {
-            foreach( $page['error'] as $error ) {
-                array_push( $errors, $error );
+            foreach( $page['error'] as $error_page ) {
+                switch ( $error_page['id'] ) {
+                    case 'headershavetext':
+                        $error = $error_page->error[0]->html;
+                        $expected = '<h1></h1>';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'amustcontaintext':
+                        $error = $error_page->error[0]->html;
+                        $expected = '<a href="https://www.google.com/&amp;c=1" target="_blank"></a>';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'asuspiciouslinktext':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'alinktextdoesnotbeginwithredundantword':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'csstexthascontrast':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'csstextstyleemphasize':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'imghasalt':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'imgaltisdifferent':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'tabledatashouldhaveth':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'tablethshouldhavescope':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'pnotusedasheader':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'videosembeddedorlinkedneedcaptions':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'noheadings':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+
+                    case 'imggifnoflicker':
+                        $error = $error_page->error[0]->html;
+                        $expected = '';
+                        $this->assertEquals( $expected, $)
+                        break;
+                }
             }
         }
 
