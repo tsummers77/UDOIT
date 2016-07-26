@@ -96,18 +96,6 @@ $test_content['items'] = [
         'url'       => "https://"
     ],
     [
-        'id'        => "noheadings",
-        'content'   => '<p>Placeholder Text 1</p><p>Placeholder Text 2</p><p>Placeholder Text 3</p><p>Placeholder Text 4</p><p>Placeholder Text 5</p>',
-        'title'     => "noHeadings",
-        'url'       => "https://"
-    ],
-    [
-        'id'        => "imggifnoflicker",
-        'content'   => '<img src="http://koala3123inv.com/sites/all/libraries/quail/test/assets/eatatjoes.gif" alt="Flickering Image">',
-        'title'     => "imgGifNoFlicker",
-        'url'       => "https://"
-    ],
-    [
         'id'        => "noIssues",
         'content'   => '<p><a id="" class="" title="" href="https://www.youtube.com/watch?v=oJ9VbNtPhIk" target="">Video With Captions</a></p>',
         'title'     => "noIssues",

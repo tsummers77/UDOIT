@@ -22,7 +22,7 @@ class UdoitTest extends PHPUnit_Framework_TestCase
     }
 
     public function testBuildReport() {
-        $test = '';
+        // $test = '';
         $errors = [];
 
         ob_start();
@@ -39,90 +39,82 @@ class UdoitTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(count($results) === 10);
 
         foreach( $results as $page ) {
-            foreach( $page['error'] as $error_page ) {
+            foreach( $page->error as $error_page ) {
                 switch ( $error_page['id'] ) {
                     case 'headershavetext':
                         $error = $error_page->error[0]->html;
                         $expected = '<h1></h1>';
-                        $this->assertEquals( $expected, $)
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'amustcontaintext':
                         $error = $error_page->error[0]->html;
                         $expected = '<a href="https://www.google.com/&amp;c=1" target="_blank"></a>';
-                        $this->assertEquals( $expected, $)
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'asuspiciouslinktext':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<a href="http://example.com/document.pdf">Click Here</a>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'alinktextdoesnotbeginwithredundantword':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<a href="https://www.google.com/">link to site</a>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'csstexthascontrast':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<p style="color: #ffff00;">Colored “Text”</p>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'csstextstyleemphasize':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<p style="color: #00000f;">Colored “Text”</p>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'imghasalt':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="">';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'imgaltisdifferent':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="googlelogo_color_272x92dp.png"></p>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'tabledatashouldhaveth':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<table border="1"><tbody><tr><td>Header 1</td>
+<td>Header 2</td>
+</tr><tr><td>Placeholder 1</td>
+<td>Placeholder 2</td>
+</tr></tbody></table>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'tablethshouldhavescope':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<th>Header 1</th>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'pnotusedasheader':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<p><strong>Bolded Paragraph Text</strong></p>';
+                        $this->assertEquals( $expected, $error);
                         break;
 
                     case 'videosembeddedorlinkedneedcaptions':
                         $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
-                        break;
-
-                    case 'noheadings':
-                        $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
-                        break;
-
-                    case 'imggifnoflicker':
-                        $error = $error_page->error[0]->html;
-                        $expected = '';
-                        $this->assertEquals( $expected, $)
+                        $expected = '<a id="" class="" title="" href="https://www.youtube.com/watch?v=oJ9VbNtPhIk" target="">Video With Captions</a>';
+                        $this->assertEquals( $expected, $error);
                         break;
                 }
             }
