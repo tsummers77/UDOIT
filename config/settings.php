@@ -3,10 +3,33 @@ define('ENV_TEST', 'test');
 define('ENV_PROD', 'prod');
 define('ENV_DEV', 'dev');
 
-define('UDOIT_VERSION', '2.4.2');
+define('UDOIT_VERSION', '2.6.0');
+
+// SET UP PHP SESSION COOKIE SAMESITE SESSIONS
+$expire = isset($session_cookie_options['expire']) ? $session_cookie_options['expire'] : 0;
+$path = isset($session_cookie_options['path']) ? $session_cookie_options['path'] : '/';
+$domain = isset($session_cookie_options['domain']) ? $session_cookie_options['domain'] : null;
+$secure = isset($session_cookie_options['secure']) ? $session_cookie_options['secure'] : true;
+$httponly = isset($session_cookie_options['httponly']) ? $session_cookie_options['httponly'] : false;
+
+if (PHP_VERSION_ID < 70300) {
+    session_set_cookie_params($expire, "$path; samesite=None", $domain, $secure, $httponly);
+} else {
+    session_set_cookie_params([
+        'expires' => $expire,
+        'path' => $path,
+        'domain' => $domain,
+        'samesite' => 'None',
+        'secure' => $secure,
+        'httponly' => $httponly,
+    ]);
+}
 
 // SET UP AUTOLOADER (uses autoload rules from composer)
 require_once(__DIR__.'/../vendor/autoload.php');
+
+// Initialize db_options. This may be overridden in the local config
+$db_options = [];
 
 // LOAD LOCAL, TEST or HEROKU CONFIG
 $local_config = getenv('USE_HEROKU_CONFIG') ? 'herokuConfig.php' : 'localConfig.php';
@@ -32,11 +55,40 @@ ini_set("display_errors", ($UDOIT_ENV == ENV_PROD ? 0 : 1));
 // SET DEFAULT ENVIRONMENT
 isset($UDOIT_ENV) || $UDOIT_ENV = ENV_PROD; // !! override in your localConfig.php
 
+
 // SET UP OAUTH
-UdoitUtils::setupOauth($oauth2_id, $oauth2_key, $oauth2_uri, $consumer_key, $shared_secret, $curl_ssl_verify);
+$oauth2_scopes = [
+    // assigments
+    'url:GET|/api/v1/courses/:course_id/assignments',
+    'url:GET|/api/v1/courses/:course_id/assignments/:id',
+    'url:PUT|/api/v1/courses/:course_id/assignments/:id',
+    // courses
+    'url:PUT|/api/v1/courses/:id',
+    'url:GET|/api/v1/courses/:id',
+    'url:POST|/api/v1/courses/:course_id/files',
+    // discussion topics
+    'url:GET|/api/v1/courses/:course_id/discussion_topics',
+    'url:GET|/api/v1/courses/:course_id/discussion_topics/:topic_id',
+    'url:PUT|/api/v1/courses/:course_id/discussion_topics/:topic_id',
+    // files
+    'url:GET|/api/v1/courses/:course_id/files',
+    'url:GET|/api/v1/courses/:course_id/folders/:id',
+    'url:GET|/api/v1/folders/:id/folders',
+    'url:GET|/api/v1/folders/:id/files',
+    // modules
+    'url:GET|/api/v1/courses/:course_id/modules',
+    'url:GET|/api/v1/courses/:course_id/modules/:module_id/items',
+    // pages
+    'url:GET|/api/v1/courses/:course_id/pages',
+    'url:GET|/api/v1/courses/:course_id/pages/:url',
+    'url:PUT|/api/v1/courses/:course_id/pages/:url',
+    // users
+    'url:GET|/api/v1/users/:user_id/profile',
+];
+UdoitUtils::setupOauth($oauth2_id, $oauth2_key, $oauth2_uri, $consumer_key, $shared_secret, $curl_ssl_verify, $oauth2_enforce_scopes, $oauth2_scopes);
 
 // SET UP DATABASE
-UdoitDB::setup($db_type, $dsn, $db_user, $db_password);
+UdoitDB::setup($db_type, $dsn, $db_user, $db_password, $db_options);
 
 // BACKGROUND WORKER
 if (isset($background_worker_enabled)) {

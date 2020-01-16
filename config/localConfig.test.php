@@ -30,16 +30,24 @@ define('GA_TRACKING_CODE', 'TEST_GA_TRACKING');
 /* Vimeo API Key */
 define('VIMEO_API_KEY', 'TEST_VIMEO_KEY');
 
+/* Course Language */
+define('COURSE_LANGUAGE', 'TEST_COURSE_LANGUAGE');
+
+/* Flag for API Caching */
+define('USE_API_CACHING', 'false');
+
 /* Database Config */
-$db_type          = 'test'; // 'mysql' or 'pgsql'
-$db_host          = ''; // localhost or ip
-$db_port          = '';
-$db_user          = '';
-$db_password      = '';
-$db_name          = '';
-$db_user_table    = 'users';
-$db_reports_table = 'reports';
-$dsn = "{$db_type}:host={$db_host};port={$db_port};dbname={$db_name}";
+$db_type            = 'test'; // 'mysql' or 'pgsql'
+$db_host            = ''; // localhost or ip
+$db_port            = '';
+$db_user            = '';
+$db_password        = '';
+$db_name            = '';
+$db_user_table      = 'users';
+$db_reports_table   = 'reports';
+$db_job_queue_table = 'job_queue';
+
+$dsn                = "{$db_type}:host={$db_host};port={$db_port};dbname={$db_name}";
 
 $debug = false;
 
@@ -52,6 +60,8 @@ $background_worker_sleep_seconds = 1;
 // Sets CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST
 // This should be true for production environments
 $curl_ssl_verify = true;
+
+$admin_panel_enabled = true;
 
 // send logs into the phpunit output
 $log_handler = new \Monolog\Handler\TestHandler(null, \Monolog\Logger::WARNING);

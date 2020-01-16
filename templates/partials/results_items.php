@@ -134,6 +134,7 @@
 														break;
 
 													case "imgHasAlt":
+													case "imgHasAltDeco":
 													case "imgNonDecorativeHasAlt":
 													case "imgAltIsDifferent":
 													case "imgAltIsTooLong":
@@ -150,6 +151,10 @@
 
 													case "aSuspiciousLinkText":
 														$result_template = 'suspicious_link_text';
+														break;
+
+													case "pNotUsedAsHeader":
+														$result_template = 'make_heading';
 														break;
 												}
 
@@ -168,3 +173,4 @@
 		<?php endforeach; # foreach ($error_types as $type_group):?>
 	</ul>
 </div>
+

@@ -144,8 +144,20 @@ function loadScanResults(reportID){
 	});
 }
 
+function stripScripts(origString) {
+	let div = document.createElement('div');
+	div.innerHTML = origString;
+	let scripts = div.getElementsByTagName('script');
+	let i = scripts.length;
+	while (i--) {
+		scripts[i].parentNode.removeChild(scripts[i]);
+	}
+	return div.innerHTML;
+}
+
 function displayScanResults(results) {
 	//show results
+	results = stripScripts(results);
 	$('#scanner').append(`<section id="result">${results}</section>`);
 	killButton(function() {
 		$('#result').fadeIn();
@@ -156,8 +168,17 @@ function displayScanResults(results) {
 }
 
 /* Builds up the results and adds them to the page */
-function sendScanRequest(main_action, base_url, course_id, context_label, context_title, content) {
-	if (content.length === 0) content = 'none';
+function sendScanRequest(main_action, base_url, course_id, context_label, context_title, content, report_types, unpublished_flag) {
+	if (content.length === 0)
+		content.push('none');
+
+	if (report_types.length === 0) {
+		report_type = 'none';
+	} else if(report_types.length === 2) {
+		report_type = 'all';
+	} else {
+		report_type = report_types[0];
+	}
 
 	$.ajax({
 		url: 'process.php',
@@ -169,7 +190,9 @@ function sendScanRequest(main_action, base_url, course_id, context_label, contex
 			content: content,
 			course_id: course_id,
 			context_label: context_label,
-			context_title: context_title
+			context_title: context_title,
+			unpublished_flag: unpublished_flag,
+			report_type: report_type
 		},
 		success: function(resp){
 			if(resp && resp.hasOwnProperty('job_group')){
@@ -267,21 +290,17 @@ function ufixitCssTextHasContrast( $issueContainer ) {
 	});
 }
 
-// resize containing iframe height
-function resizeFrame(){
-	var default_height = $('body').height() + 50;
-    default_height = default_height > 500 ? default_height : 500;
-
-    // IE 8 & 9 only support string data, so send objects as string
-    parent.postMessage(JSON.stringify({
-      subject: "lti.frameResize",
-      height: default_height
-    }), "*");
-}
-
 // update iframe height on resize
 $doc.on('resize', function(){
 	resizeFrame();
+});
+
+// Open error-preview links in new tab
+$doc.ready(function(){
+	$('body').on('click', '.error-preview > a', function(){
+		window.open($(this).attr('href'));
+		return false;
+	});
 });
 
 // END update UFIXIT Preview on load
@@ -304,8 +323,9 @@ $doc.ready(function() {
 
 	$('.content:not(#allContent)').click(function() {
 		var $content_checkboxes = $(this).parent().parent().parent().find('.content:not(#allContent):checked');
+		var $all_checkboxes = $(this).parent().parent().parent().find('.content:not(#allContent)');
 
-		if ($content_checkboxes.length == 5) {
+		if ($content_checkboxes.length == $all_checkboxes.length) {
 			$('#allContent').prop('checked', true);
 			content_checked = true;
 		} else {
@@ -314,6 +334,34 @@ $doc.ready(function() {
 		}
 	});
 	// END content checkboxes
+
+	// report checkboxes
+	var report_checked = true;
+
+	$('#allReport').click(function() {
+		var $report_checkboxes = $(this).parent().parent().parent().find('.report:not(#allReport)');
+		if (report_checked) {
+			$report_checkboxes.prop('checked', false);
+			report_checked = false;
+		} else {
+			$report_checkboxes.prop('checked', true);
+			report_checked = true;
+		}
+	});
+
+	$('.report:not(#allReport)').click(function() {
+		var $report_checkboxes = $(this).parent().parent().parent().find('.report:not(#allReport):checked');
+		var $all_checkboxes = $(this).parent().parent().parent().find('.report:not(#allReport)');
+
+		if ($report_checkboxes.length == $all_checkboxes.length) {
+			$('#allReport').prop('checked', true);
+			report_checked = true;
+		} else {
+			$('#allReport').prop('checked', false);
+			report_checked = false;
+		}
+	});
+	// END report checkboxes
 
 	var runScanner = function(e) {
 		e.preventDefault();
@@ -328,9 +376,11 @@ $doc.ready(function() {
 		var context_label = $('input[name="session_context_label"]').val();
 		var context_title = $('input[name="session_context_title"]').val();
 		var content = $('.content:not(#allContent):checked').map(function(i, n) { return $(n).val(); }).get();
+		var unpublished_flag = $('#unpubCheckbox').is(":checked") ? 1 : 0;
+		var report_types = $('.report:not(#allReport):checked').map(function(i, n) { return $(n).val(); }).get();
 
 		displayLoader();
-		sendScanRequest(main_action, base_url, course_id, context_label, context_title, content);
+		sendScanRequest(main_action, base_url, course_id, context_label, context_title, content, report_types, unpublished_flag);
 
 		return false;
 	};
@@ -340,7 +390,8 @@ $doc.ready(function() {
 
 	// result panel collapsing
 	$doc.on('click', '.panel-heading .btn-toggle', function() {
-		$(this).children('button span').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+		$('span.glyphicon', this).removeClass('glyphicon-minus').addClass('glyphicon-plus');
+		$('span.sr-only span', this).text('Expand');
 		var $errorItem = $(this).parent();
 		if ($errorItem.parent().find('.errorSummary').is(':visible')) {
 			$errorItem.parent().find('.errorSummary').slideUp(function() {
@@ -350,7 +401,8 @@ $doc.ready(function() {
 			});
 		}
 		else {
-			$(this).children('button span').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+			$('span.glyphicon', this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
+			$('span.sr-only span', this).text('Collapse');
 			$errorItem.parent().find('.errorSummary').slideDown(function(){
 				resizeFrame();
 			});
@@ -384,7 +436,7 @@ $doc.ready(function() {
 			tmpElement = $vidiframe.detach();
 			tmpElement.appendTo($error.find('div.more-info .error-preview'));
 		}
-		
+
 		$error.find('p.manual-notification').first().removeClass('hidden');
 		$error.find('a.viewError').removeClass('hidden');
 		$error.find('a.viewError').focus();
@@ -424,6 +476,12 @@ $doc.ready(function() {
 		var msg = event.target.parentElement.querySelector('.toolmessage');
 		$(msg).stop().fadeOut();
 	});
+
+	// make decorative button
+	$doc.on('click', '.makedeco', function() {
+		$(this).parent().parent().parent().find('.form-control').prop('disabled', $(this).is(':checked'));
+	});
+	// END make decorative button
 
 	// the "U FIX IT" button
 	$doc.on('click', '#scanner button.fix-this', function() {
@@ -479,16 +537,20 @@ $doc.ready(function() {
 			}
 		}
 
-		if (type == "imgAltIsDifferent" || type == "imgAltIsTooLong" || type == "imgHasAlt" || type == "imgNonDecorativeHasAlt") {
+		if (type == "imgAltIsDifferent" || type == "imgAltIsTooLong" || type == "imgHasAlt" || type == "imgNonDecorativeHasAlt" || type == "imgHasAltDeco") {
 			var $input = $(this).find('input[name="newcontent"]');
 			var $imgSrc = $(this).find('input[name="errorhtml"]');
-			if ($input.val().trim() == ''){
-				valid = false;
-			} else if ($imgSrc.val().indexOf($input.val().trim()) >= 0) {
-				valid = false;
-			} else if ($input.val().match(/jpg|JPG|png|PNG|gif|GIF|jpeg|JPEG$/)) {
-				valid = false;
+			var makeDeco = $(this).find('input[name="makedeco"]').is(':checked');
+			if(!makeDeco) {
+				if ($input.val().trim() == ''){
+					valid = false;
+				} else if ($imgSrc.val().indexOf($input.val().trim()) >= 0) {
+					valid = false;
+				} else if ($input.val().match(/jpg|JPG|png|PNG|gif|GIF|jpeg|JPEG$/)) {
+					valid = false;
+				}
 			}
+
 		}
 
 		if ((type == "aMustContainText" || type == "aSuspiciousLinkText" || type == "aLinkTextDoesNotBeginWithRedundantWord") && !removeLink) {
@@ -747,6 +809,34 @@ $doc.ready(function() {
 			success: function(data) {
 				$('#cached').html(data);
 				resizeFrame();
+
+				let localTime = new Date();
+				// Grab the timezone offset and swap the sign since JS does things backwards
+				let tz = (localTime.getTimezoneOffset()/60)*-1;
+				let tzStr = "";
+				if (tz > 0) {
+					tzStr = " (GMT+" + tz + ")";
+				} else {
+					tzStr = " (GMT" + tz + ")";
+				}
+
+				$("#resultsTable table thead tr th:first-child").append(tzStr);
+
+				// Convert all timestamps to pretty time in local timezone
+				let options = {
+					month: 'long',
+					day: 'numeric',
+					year: 'numeric',
+					hour: 'numeric',
+					minute: 'numeric'
+				};
+
+				$.each($("#resultsTable table tbody td:first-child"), function(key, value){
+					let origString = $(value).text();
+					let origDate = new Date(origString);
+					let newString = origDate.toLocaleDateString("en-us", options);
+					$(value).text(newString);
+				});
 			},
 			error: function() {
 				$('#cached').append(buildAlertString('Error displaying cached reports.'));

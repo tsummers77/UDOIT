@@ -5,9 +5,25 @@ $consumer_key  = '';
 $shared_secret = '';
 
 /* Canvas Developer Key Oauth 2.0 Settings */
-$oauth2_id  = ''; // Provided by your Canvas Admin
-$oauth2_key = ''; // Provided by your Canvas Admin
-$oauth2_uri = ''; // EX: https://udoit.my-org.edu/oauth2response.php or https://udoit.my-org.edu/udoit/public/oauth2response.php
+$oauth2_id             = '';    // Provided by your Canvas Admin
+$oauth2_key            = '';    // Provided by your Canvas Admin
+$oauth2_uri            = '';    // EX: https://udoit.my-org.edu/oauth2response.php or https://udoit.my-org.edu/udoit/public/oauth2response.php
+$oauth2_enforce_scopes = false; // Set to true if you have a scoped developer key.
+
+/* Set session cookie options
+ * expire - the cookie expiration time in seconds (0 means it does not expire)
+ * path - the applications on this domain to which the cookie is visible
+ * domain - the domain to which this cookie is visible
+ * secure - 'true' to send the cookie only over secure connections
+ * httponly - 'true' to set the 'httponly' flag when setting the cookie
+ */
+$session_cookie_options = [
+    'expire' => getenv('SESSION_COOKIE_EXPIRE') ?: 0,
+    'path' => getenv('SESSION_COOKIE_PATH') ?: '/',
+    'domain' => getenv('SESSION_COOKIE_DOMAIN') ?: null,
+    'secure' => getenv('SESSION_COOKIE_SECURE') ?: true,
+    'httponly' => getenv('SESSION_COOKIE_HTTPONLY') ?: false,
+];
 
 /* Disable headings check character count */
 $doc_length = '1500';
@@ -34,16 +50,24 @@ define('VIMEO_API_KEY', '');
 /* Google Analytics Tracking Code */
 define('GA_TRACKING_CODE', '');
 
+/* Flag for API Caching */
+define('USE_API_CACHING', '');
+
 /* Database Config */
-$db_type          = 'mysql'; // 'mysql' or 'pgsql'
-$db_host          = ''; // localhost or some other domain/ip
-$db_port          = '3306';
-$db_user          = '';
-$db_password      = '';
-$db_name          = '';
-$db_user_table    = 'users';
-$db_reports_table = 'reports';
-$dsn              = "{$db_type}:host={$db_host};port={$db_port};dbname={$db_name}";
+$db_type            = 'mysql'; // 'mysql' or 'pgsql'
+$db_host            = ''; // localhost or some other domain/ip
+$db_port            = '3306';
+$db_user            = '';
+$db_password        = '';
+$db_name            = '';
+$db_user_table      = 'users';
+$db_reports_table   = 'reports';
+$db_job_queue_table = 'job_queue';
+
+$dsn                = "{$db_type}:host={$db_host};port={$db_port};dbname={$db_name}";
+
+/* Add key/value options to passed directly to the PDO object */
+$db_options = [];
 
 $debug = false;
 
@@ -66,3 +90,17 @@ $background_worker_sleep_seconds = 7;
 // For use while developing with self-signed SSL Certificates
 // Sets CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST
 $curl_ssl_verify = true; // This should be true for production environments
+
+
+/* Admin Panel
+ *
+ * True adds a Admin Navigation placement to the XML. Allows for generating
+ * statistics about usage of UDOIT. Also allows for user administration.
+ *
+ * False disables access and removes block from XML. Use this setting if you
+ * are in a multitenant environment, as the 2.5.0 release of UDOIT does not
+ * separate data between instances of Canvas.
+ *
+ * Default false
+ */
+$admin_panel_enabled = false;

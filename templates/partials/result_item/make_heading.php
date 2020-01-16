@@ -17,27 +17,15 @@
 *
 *	Primary Author Contact:  Jacob Bates <jacob.bates@ucf.edu>
 */
-
 ?>
-<div id="resultsTable" class="table-responsive">
-	<table class="table table-bordered table-hover no-margin">
-		<caption>Saved reports for this course</caption>
-		<thead>
-			<tr>
-				<th scope="col">Date &amp; Time</th>
-				<th scope="col">Errors</th>
-				<th scope="col">Suggestions</th>
-			</tr>
-		</thead>
-
-		<tbody>
-			<?php foreach ($reports as $report): ?>
-				<tr id="<?= $this->e($report['id']); ?>">
-					<td><?= $this->e($report['date']); ?></td>
-					<td><?= $this->e($report['errors']); ?></td>
-					<td><?= $this->e($report['suggestions']); ?></td>
-				</tr>
-			<?php endforeach; ?>
-		</tbody>
-	</table>
+<div class="input-group">
+	<label for="<?= $this->e($item_id); ?>-input" class="control-label sr-only">Select which heading the paragraph should be</label>
+	<select class="form-control" name="newcontent" id="<?= $this->e($item_id); ?>-input">
+		<option value="h2">h2</option>
+		<option value="h3">h3</option>
+		<option value="h4">h4</option>
+	</select>
+	<span class="input-group-btn">
+		<button class="submit-content inactive btn btn-default" type="submit">Submit</button>
+	</span>
 </div>
