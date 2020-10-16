@@ -1,0 +1,194 @@
+#----------------------------------------------------------------------------
+# build udoit local docker zzz
+#----------------------------------------------------------------------------
+docker build -t udoit `
+--build-arg sample=sample `
+.
+
+#----------------------------------------------------------------------------
+# run udoit local devt against world campus playground server
+#----------------------------------------------------------------------------
+docker run -d -p "80:8080" -p "443:443" --name udoit --network udoit-app `
+-e CONSUMER_KEY=abc `
+-e SHARED_SECRET=123 `
+-e OAUTH2_ID=107410000000000246 `
+-e OAUTH2_KEY=5XQAdQbmT8m28oUcKWMdUWo2GFoDVTZ7wpaGvNN8k1Y4ZV6a8vSHutsFXoytEMZL `
+-e OAUTH2_URI=https://localhost/oauth2response.php `
+-e DATABASE_HOST=postgres `
+-e DATABASE_PORT=5432 `
+-e DATABASE_USER=udoit `
+-e DATABASE_PWD=udoit `
+-e DATABASE_NAME=udoit `
+udoit
+
+# for database container
+docker run -d -p "5432:5432" -p ":443" --name postgres --network udoit-app `
+-e POSTGRES_USER=udoit `
+-e POSTGRES_PASSWORD=udoit `
+-e POSTGRES_DB=udoit `
+postgres
+
+#----------------------------------------------------------------------------
+# check network that a container is running in
+#----------------------------------------------------------------------------
+docker inspect c1 -f "{{json .NetworkSettings.Networks }}"
+
+# Sample Output
+{"udoit-app":{"IPAMConfig":{},"Links":null,"Aliases":["4bbb3750005c"],"NetworkID":"0c1aef076b3c047c8250a85685ea260e96acd8e41a1d25d1dbdc38d06693196a","EndpointID":"eaa109b723a597989e6b9b1137c42fd38bc5df3552775848f91635cea4d41384","Gateway":"172.20.0.1","IPAddress":"172.20.0.2","IPPrefixLen":16,"IPv6Gateway":"","GlobalIPv6Address":"","GlobalIPv6PrefixLen":0,"MacAddress":"02:42:ac:14:00:02","DriverOpts":{}}}
+
+#----------------------------------------------------------------------------
+# generate ssl key for local devt server
+# https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-16-04
+# https://www.madboa.com/geek/openssl/#how-do-i-generate-a-self-signed-certificate
+# https://www.openssl.org/docs/manmaster/man1/openssl-req.html
+# https://stackoverflow.com/questions/8075274/is-it-possible-making-openssl-skipping-the-country-common-name-prompts
+#----------------------------------------------------------------------------
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+
+# include prompted settings on cmd line: https://www.madboa.com/geek/openssl/#how-do-i-generate-a-self-signed-certificate
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj '/CN=localhost/O=Penn State/C=US/ST=Pennsylvania/L=State College'
+
+#----------------------------------------------------------------------------
+# Create a strong Diffie-Hellman group
+#----------------------------------------------------------------------------
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+#----------------------------------------------------------------------------
+# examine cert file
+#----------------------------------------------------------------------------
+ openssl x509 -in nginx-selfsigned.crt -text -noout
+
+#----------------------------------------------------------------------------
+# Create a Configuration Snippet Pointing to the SSL Key and Certificate
+#----------------------------------------------------------------------------
+sudo nano /etc/nginx/snippets/self-signed.conf
+
+#contents of self-signed.conf
+----
+ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt; ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+----
+
+# from https://cipherli.st/
+# and https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+
+"/etc/nginx/snippets/ssl-params.conf"
+----
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+ssl_prefer_server_ciphers on;
+ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+ssl_ecdh_curve secp384r1;
+ssl_session_cache shared:SSL:10m;
+ssl_session_tickets off;
+ssl_stapling on;
+ssl_stapling_verify on;
+resolver 8.8.8.8 8.8.4.4 valid=300s;
+resolver_timeout 5s;
+# Disable preloading HSTS for now.  You can use the commented out header line that includes
+# the "preload" directive if you understand the implications.
+#add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+add_header Strict-Transport-Security "max-age=63072000; includeSubdomains";
+add_header X-Frame-Options DENY;
+add_header X-Content-Type-Options nosniff;
+
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+----
+
+RUN 
+docker run -dp "80:8080" -p "443:443" --network-alias udoit_app `
+-e CONSUMER_KEY=abc `
+-e SHARED_SECRET=123 `
+-e OAUTH2_ID=107410000000000069 `
+-e OAUTH2_KEY=quMZ76UeTtkUlaWA3ATk1IyCj0QicwKEdcRv7j6IgYoEsbk86m9p4POrfTM27jGf `
+-e OAUTH2_URI=https://localhost/oauth2response.php `
+-e DATABASE_HOST=postgres `
+-e DATABASE_PORT=5432 `
+-e DATABASE_USER=udoit `
+-e DATABASE_PWD=udoit `
+-e DATABASE_NAME=udoit `
+udoit
+
+#----------------------------------------------------------------------------
+# Postgres create tables from scratch
+#----------------------------------------------------------------------------
+
+psql -U udoit -d udoit
+
+CREATE TABLE IF NOT EXISTS reports (
+                id SERIAL PRIMARY KEY,
+                user_id integer,
+                course_id integer,
+                report_json text,
+                date_run timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+                errors integer,
+                suggestions integer
+            );
+
+CREATE TABLE IF NOT EXISTS users (
+                id integer CONSTRAINT users_pk PRIMARY KEY,
+                api_key varchar(255),
+                date_created timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+            );
+
+CREATE TABLE IF NOT EXISTS job_queue (
+                id SERIAL PRIMARY KEY,
+                job_group varchar(255),
+                user_id integer,
+                job_type varchar(255),
+                data text,
+                results text,
+                status varchar(255),
+                date_created timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+                date_completed timestamp with time zone,
+                report_id integer
+            );
+
+ALTER TABLE users ADD refresh_token VARCHAR(255) NOT NULL;
+ALTER TABLE users ADD canvas_url VARCHAR(255) NOT NULL;
+
+#----------------------------------------------------------------------------
+# Restartable Worker Process
+# https://stackoverflow.com/questions/37015624/how-to-run-a-cron-job-inside-a-docker-container
+# https://www.osetc.com/en/how-to-run-cron-job-to-check-and-restart-service-if-dead-in-linux.html
+# https://github.com/OpenRC/openrc/blob/master/service-script-guide.md
+# https://docs.alpinelinux.org/user-handbook/0.1a/Working/openrc.html
+#----------------------------------------------------------------------------
+
+*/1 * * * * /udoit-worker-monitor >> /var/log/udoit-worker-monitor.log
+
+
+
+#--------------- kubernetes cluster access
+(Keybase conversation)
+for the swe-acceptance namespace, I think you want
+keybase://team/sweinfra/setup_kubectl/swe-acceptance/setup_kubectl.sh
+4:57
+The k8s-qa-ro is old I believe
+unless the OIDC one is what SWE is supposed to be using now.  I can’t answer that though.
+
+Dom  4:58 PM
+I'd higly recommend going through this new and slightly improved guide as well. https://git.psu.edu/ais-swe/swe-site/-/wikis/k8s/Connect-To-Cluster
+it switches over to using Azure OIDC auth instead. @tcs1, you can always ask @Marc Burns for advice since he was the first person I put through the pain of switching over.
+
+
+# copy self signed keys to avoid need to regenerate during build
+# sample: docker cp <containerId>:/file/path/within/container /host/path/target
+
+docker cp udoit:/etc/ssl/private/nginx-selfsigned.key C:\git/UDOIT/local_certs/
+docker cp udoit:/etc/ssl/certs/nginx-selfsigned.crt C:\git/UDOIT/local_certs/
+docker cp udoit:/etc/ssl/certs/dhparam.pem C:\git/UDOIT/local_certs/
+docker cp udoit:/etc/nginx/snippets/self-signed.conf C:\git/UDOIT/local_certs/
+docker cp udoit:/etc/nginx/snippets/ssl-params.conf C:\git/UDOIT/local_certs/
+
+docker run -d -p "80:8080" -p "443:443" --name udoit --network udoit-app `
+ -e CONSUMER_KEY=abc `
+ -e SHARED_SECRET=123 `
+ -e OAUTH2_ID=107410000000000246 `
+ -e OAUTH2_KEY=5XQAdQbmT8m28oUcKWMdUWo2GFoDVTZ7wpaGvNN8k1Y4ZV6a8vSHutsFXoytEMZL `
+ -e OAUTH2_URI=https://localhost/oauth2response.php `
+ -e DATABASE_HOST=postgres `
+ -e DATABASE_PORT=5432 `
+ -e DATABASE_USER=udoit `
+ -e DATABASE_PWD=udoit `
+ -e DATABASE_NAME=udoit `
+udoit

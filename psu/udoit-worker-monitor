@@ -1,0 +1,45 @@
+#!/bin/sh
+
+HOME=/root
+TERM=xterm
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+SHELL=/bin/sh
+
+SERVICE="php /var/www/html/lib/worker.php"
+WAIT_LIMIT=10
+
+# check if udoit worker is running
+if ! pgrep -x -f "$SERVICE" >/dev/null
+then
+  echo "$SERVICE is not running - attempting to start"
+
+  # attempt to start/restart worker
+  eval $SERVICE &
+
+  # wait for process to start
+  WAIT_COUNT=0
+  if ! pgrep -x -f "$SERVICE" >/dev/null
+  then
+    until pgrep -x -f "$SERVICE" >/dev/null
+    do
+      sleep 1
+
+      WAIT_COUNT=`expr $WAIT_COUNT + 1`
+      if [ $WAIT_COUNT -gt $WAIT_LIMIT ]
+      then
+        echo "$SERVICE timed out trying to startup"
+        break;
+      fi
+    done
+
+    # check if worker is running again and output status
+    if pgrep -x -f "$SERVICE" >/dev/null
+    then
+      echo "$SERVICE started successfully"
+    else
+      echo "$SERVICE failed to start"
+    fi
+  else
+    echo "$SERVICE is running"
+  fi
+fi
