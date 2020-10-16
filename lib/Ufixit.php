@@ -84,6 +84,16 @@ class Ufixit
     public $replacement_count = 1;
 
     /**
+     * Options to pass to HTMLMinify when it is run
+     * @var array
+     */
+    public $htmlminify_options = [
+        'doctype' => HTMLMinify::DOCTYPE_HTML5,
+        'optimizationLevel' => HTMLMinify::OPTIMIZATION_ADVANCED,
+        'removeDuplicateAttribute' => false,
+    ];
+
+    /**
      * The class constructor
      * @param array $data - Array of POST data
      */
@@ -107,7 +117,7 @@ class Ufixit
      */
     public function fixAltText($error_html, $new_content, $make_decorative, $submitting_again = false)
     {
-        $this->dom->loadHTML("<?xml encoding=\"utf-8\" ?>{$error_html}");
+        $this->dom->loadHTML("<?xml encoding=\"utf-8\" ?>{$error_html}", LIBXML_HTML_NODEFDTD);
 
         $imgs = $this->dom->getElementsByTagName('img');
         $fixed_img = null;
@@ -150,7 +160,7 @@ class Ufixit
         $fixed_css = preg_replace('/font-style:\s*([a-z0-9]*)\s*;*\s*/', '', $fixed_css);
         $fixed_css = preg_replace('/style="/', 'style="background-color: '.$new_content[0].'; color: '.$new_content[1].';', $fixed_css);
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$fixed_css);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$fixed_css, LIBXML_HTML_NODEFDTD);
 
         $tag = $this->dom->getElementsByTagName($matches[1][0])->item(0);
 
@@ -193,7 +203,7 @@ class Ufixit
             $fixed_css = preg_replace('/color:\s*([#a-z0-9]*)\s*;*\s*/', '', $fixed_css);
         }
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$fixed_css);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$fixed_css, LIBXML_HTML_NODEFDTD);
 
         $tag = $this->dom->getElementsByTagName($matches[1][0])->item(0);
 
@@ -229,7 +239,7 @@ class Ufixit
             return $fixed_link;
         }
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html, LIBXML_HTML_NODEFDTD);
 
         $tag = $this->dom->getElementsByTagName('a')->item(0);
 
@@ -261,7 +271,7 @@ class Ufixit
         $matches = [];
         preg_match('/h[0-6]/i', $error_html, $matches);
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html, LIBXML_HTML_NODEFDTD);
 
         $tag = $this->dom->getElementsByTagName($matches[0])->item(0);
 
@@ -289,7 +299,7 @@ class Ufixit
             return $fixed_heading;
         }
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html, LIBXML_HTML_NODEFDTD);
 
         $p = $this->dom->getElementsByTagName('p')->item(0);
 
@@ -315,24 +325,36 @@ class Ufixit
             'fixed' => '',
         ];
 
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html, LIBXML_HTML_NODEFDTD);
 
         switch ($selected_header) {
             case 'col':
                 $trs = $this->dom->getElementsByTagName('tr');
 
-                foreach ($trs as $tr) {
+                $last_item = $trs->length - 1;
+                foreach ($trs as $arrkey => $tr) {
                     $new_data['old'] .= $this->dom->saveHTML($tr);
+
+                    // Add a newline between each output so it matches the original
+                    if ($arrkey < $last_item) {
+                        $new_data['old'] .= "\n";
+                    }
                 }
 
-                foreach ($trs as $tr) {
-                    $td = $tr->firstChild;
+                foreach ($trs as $arrkey => $tr) {
+                    $td = $tr->getElementsByTagName('td')->item(0);
                     $td = $this->renameElement($td, 'th');
 
                     $td->setAttribute('scope', 'row');
 
                     $new_data['fixed'] .= $this->dom->saveHTML($tr);
+
+                    // Add a newline between each output so it matches the original
+                    if ($arrkey < $last_item) {
+                        $new_data['fixed'] .= "\n";
+                    }
                 }
+
                 break;
 
             case 'row':
@@ -349,6 +371,8 @@ class Ufixit
                     }
                 }
 
+                //TODO: Move $tr out of <tbody> and into a new <thead> above <tbody>
+
                 $new_data['fixed'] = $this->dom->saveHTML($tr);
                 break;
 
@@ -356,8 +380,14 @@ class Ufixit
                 $first = true;
                 $trs   = $this->dom->getElementsByTagName('tr');
 
-                foreach ($trs as $tr) {
+                $last_item = $trs->length - 1;
+                foreach ($trs as $arrkey => $tr) {
                     $new_data['old'] .= $this->dom->saveHTML($tr);
+
+                    // Add a newline between each output so it matches the original
+                    if ($arrkey < $last_item) {
+                        $new_data['old'] .= "\n";
+                    }
                 }
 
                 foreach ($trs as $tr) {
@@ -378,12 +408,13 @@ class Ufixit
                         continue;
                     }
 
-                    $td = $tr->firstChild;
+                    $td = $tr->getElementsByTagName('td')->item(0);
                     $td = $this->renameElement($td, 'th');
 
                     $td->setAttribute('scope', 'row');
 
-                    $new_data['fixed'] .= $this->dom->saveHTML($tr);
+                    // Add a newline before every export of a row (First is skipped)
+                    $new_data['fixed'] .= "\n".$this->dom->saveHTML($tr);
                 }
 
                 break;
@@ -402,7 +433,7 @@ class Ufixit
      */
     public function fixTableThScopes($error_html, $new_content, $submitting_again = false)
     {
-        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html);
+        $this->dom->loadHTML('<?xml encoding="utf-8" ?>'.$error_html, LIBXML_HTML_NODEFDTD);
 
         $ths = $this->dom->getElementsByTagName('th');
 
@@ -527,10 +558,18 @@ class Ufixit
      */
     public function replaceContent($html, $error, $corrected)
     {
-        $error      = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $error), ['doctype' => 'html5']);
-        $corrected  = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $corrected), ['doctype' => 'html5']);
-        $html       = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, htmlentities($html)), ['doctype' => 'html5']);
-        $html       = str_replace($error, $corrected, html_entity_decode($html));
+        global $logger;
+
+        $error      = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $error), $this->htmlminify_options);
+        $corrected  = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $corrected), $this->htmlminify_options);
+        $html       = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, htmlentities($html)), $this->htmlminify_options);
+
+        $count = 0;
+        $html = str_replace($error, $corrected, html_entity_decode($html), $count);
+
+        if (0 === $count) {
+            $logger->addError("No replacement occurred.\nOld: \n".$error."\nNew:\n".$corrected."\nContext:\n".$html);
+        }
 
         return $html;
     }
@@ -579,9 +618,9 @@ class Ufixit
     public function uploadFixedFiles($corrected_error, $error_html)
     {
         global $logger;
-        $error_html      = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $error_html), ['doctype' => 'html5']);
-        $corrected_error = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $corrected_error), ['doctype' => 'html5']);
-        $html            = HTMLMinify::minify($this->curled_file['html'], ['doctype' => 'html5']);
+        $error_html      = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $error_html), $this->htmlminify_options);
+        $corrected_error = HTMLMinify::minify(str_replace($this->annoying_entities, $this->entity_replacements, $corrected_error), $this->htmlminify_options);
+        $html            = HTMLMinify::minify($this->curled_file['html'], $this->htmlminify_options);
 
         $html = str_replace($error_html, $corrected_error, $html);
 

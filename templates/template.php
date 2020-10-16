@@ -17,6 +17,8 @@
 *
 *	Primary Author Contact:  Jacob Bates <jacob.bates@ucf.edu>
 */
+
+global $footer_enabled;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,6 +30,8 @@
 		<link href='//fonts.googleapis.com/css?family=Sonsie+One' rel='stylesheet' type='text/css'>
 		<link href="assets/css/main.css?v=<?= UDOIT_VERSION ?>" type="text/css" rel="stylesheet" media="screen">
 		<link href="assets/css/print.css?v=<?= UDOIT_VERSION ?>" type="text/css" rel="stylesheet" media="print">
+		<link href="assets/css/results_filter.css?v=<?= UDOIT_VERSION ?>" type="text/css" rel="stylesheet">
+		<link href="assets/css/ucfaccordion.css?v=<?= UDOIT_VERSION ?>" type="text/css" rel="stylesheet">
 	</head>
 	<body>
 		<div class="container">
@@ -38,8 +42,10 @@
 
 			<?= $this->section('content'); ?>
 
+			<?php if ($footer_enabled): ?>
+				<?= $this->fetch('partials/footer'); ?>
+			<?php endif; ?>
 		</div>
-
 
 		<?php if ($footer_scripts): ?>
 			<?php foreach($footer_scripts as $script): ?>
